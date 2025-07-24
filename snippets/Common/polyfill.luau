@@ -4,8 +4,9 @@ return function(utils: typeof(require("./utils")()))
     local rt, memory_at_0, cfns, INDIRECT_FUNCTIONS
     local polyfill = {}
 
-    local NOW_TIME = os.time() * 1000
+    local START_CLOCK, NOW_TIME = os.clock(), os.time() * 1000
     local FILE_MAP = { {}, {} }
+    local LONGJMP_THROW_SIGN = newproxy(false)
     local __TIMERS = {}
     local __EXIT_STATUS = nil
     local __ABORT_WASM = false
@@ -21,6 +22,11 @@ return function(utils: typeof(require("./utils")()))
         end
         table.clear(file)
         file[1] = string.sub(final, last + 1)
+    end
+
+    -- returns time since the instance was initialized
+    local function now_clock(): number
+        return os.clock() - START_CLOCK
     end
 
     function polyfill.proc_exit(code: number)
@@ -62,11 +68,11 @@ return function(utils: typeof(require("./utils")()))
     end
 
     function polyfill.emscripten_date_now()
-        return NOW_TIME + os.clock() * 1000
+        return NOW_TIME + now_clock() * 1000
     end
 
     function polyfill._emscripten_throw_longjmp()
-        return error("Infinity", 0)
+        return error(LONGJMP_THROW_SIGN, 0)
     end
 
     function polyfill._emscripten_runtime_keepalive_clear()
@@ -114,7 +120,7 @@ return function(utils: typeof(require("./utils")()))
             end
 
             local success, err = pcall(function()
-                cfns._emscripten_timeout(which, os.clock())
+                cfns._emscripten_timeout(which, now_clock())
                 if (__NO_EXIT_RUNTIME or __RUNTIME_KEEPALIVE_COUNTER > 0) then
                     return
                 end
@@ -181,7 +187,9 @@ return function(utils: typeof(require("./utils")()))
         if clock_id == 0 then
             time_now = polyfill.emscripten_date_now()
         elseif true then -- if nowIsMonotonic is 1
-            time_now = os.clock()
+            time_now = now_clock()
+        else
+            return 52
         end
 
         local nsec = math.round(time_now * 1000 * 1000)
