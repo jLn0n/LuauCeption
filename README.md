@@ -2,7 +2,7 @@
 Running Luau inside Luau. Inspired by [@Rerumu's LuauInLuau](https://gist.github.com/Rerumu/ecaf1de2f2b31d0fa91b9bac8e1e15d8).
 
 ## Notes
-- There's existing work on getting analysis to work (at the ``analysis`` branch), however it doesn't work (code aborts)
+- This branch is only for self-development, changes here will not be pushed to the main repository.
 
 ## Testing
 LuauCeption uses [lune](https://github.com/lune-org/lune) (runtime) and [frktest](https://github.com/itsfrank/frktest) (library). See ``src/tests`` to view the tests stuff.
