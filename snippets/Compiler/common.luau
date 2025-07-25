@@ -57,7 +57,7 @@ return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils: typeof(require
     end
 
     function module.luau_compile(source: string, options: LuauCompileOptions): (string, number)
-        -- load source string and provided luau_CompileOptions
+        -- load source and luau_CompileOptions
         local luau_CompileOptions_ptr, compileOptions_free = construct_luau_CompileOptions(options)
         local source_ptr = utils.cstr(source)
 
