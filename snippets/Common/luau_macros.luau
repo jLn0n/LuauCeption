@@ -1,27 +1,27 @@
+local LUAI_MAXCSTACK    = 8000
+local LUA_REGISTRYINDEX = -LUAI_MAXCSTACK - 2000
+local LUA_ENVIRONINDEX  = -LUAI_MAXCSTACK - 2001
+local LUA_GLOBALSINDEX  = -LUAI_MAXCSTACK - 2002
+local LUA_VECTOR_SIZE   = 3
+
+local LUA_TNIL           = 0
+local LUA_TBOOLEAN       = 1
+local LUA_TLIGHTUSERDATA = 2
+local LUA_TNUMBER        = 3
+local LUA_TVECTOR        = 4
+local LUA_TSTRING        = 5
+local LUA_TTABLE         = 6
+local LUA_TFUNCTION      = 7
+local LUA_TUSERDATA      = 8
+local LUA_TTHREAD        = 9
+local LUA_TBUFFER        = 10
+local LUA_TPROTO         = 11
+local LUA_TUPVAL         = 12
+local LUA_TDEADKEY       = 13
+local LUA_T_COUNT        = LUA_TPROTO
+
 return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS)
-    local LUAI_MAXCSTACK    = 8000
-    local LUA_REGISTRYINDEX = -LUAI_MAXCSTACK - 2000
-    local LUA_ENVIRONINDEX  = -LUAI_MAXCSTACK - 2001
-    local LUA_GLOBALSINDEX  = -LUAI_MAXCSTACK - 2002
-    local LUA_VECTOR_SIZE   = 3
-
-    local LUA_TNIL           = 0
-    local LUA_TBOOLEAN       = 1
-    local LUA_TLIGHTUSERDATA = 2
-    local LUA_TNUMBER        = 3
-    local LUA_TVECTOR        = 4
-    local LUA_TSTRING        = 5
-    local LUA_TTABLE         = 6
-    local LUA_TFUNCTION      = 7
-    local LUA_TUSERDATA      = 8
-    local LUA_TTHREAD        = 9
-    local LUA_TBUFFER        = 10
-    local LUA_TPROTO         = 11
-    local LUA_TUPVAL         = 12
-    local LUA_TDEADKEY       = 13
-    local LUA_T_COUNT        = LUA_TPROTO
-
-    local macros = {
+    return {
         LUA_TNIL           = LUA_TNIL,
         LUA_TBOOLEAN       = LUA_TBOOLEAN,
         LUA_TLIGHTUSERDATA = LUA_TLIGHTUSERDATA,
@@ -33,7 +33,7 @@ return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS)
         LUA_TUSERDATA      = LUA_TUSERDATA,
         LUA_TTHREAD        = LUA_TTHREAD,
         LUA_TBUFFER        = LUA_TBUFFER,
-        LUA_TPROTO         = LUA_TPROTO,  
+        LUA_TPROTO         = LUA_TPROTO,
         LUA_TUPVAL         = LUA_TUPVAL,
         LUA_TDEADKEY       = LUA_TDEADKEY,
         LUA_T_COUNT        = LUA_T_COUNT,
@@ -135,5 +135,4 @@ return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS)
         --// luaL_addchar     = function(B, c)                   return ((void)((B)->p < (B)->end || luaL_prepbuffsize(B, 1)), (*(B)->p++ = (char)(c))) end,
         luaL_addstring        = function(B, s)                   return cfns.luaL_addlstring(B, s, cfns.strlen(s)) end,
     }
-    return macros
 end
