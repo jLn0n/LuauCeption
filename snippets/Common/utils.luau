@@ -76,7 +76,7 @@ return function()
         return CException
     end
 
-    return module, function(c_rt, c_memory_at_0, c_cfns, c_INDIRECT_FUNCTIONS)
-        rt, memory_at_0, cfns, INDIRECT_FUNCTIONS = c_rt, c_memory_at_0, c_cfns, c_INDIRECT_FUNCTIONS
+    return module, function(_rt: any, _memory_at_0: any, _cfns: any, _INDIRECT_FUNCTIONS: any)
+        rt, memory_at_0, cfns, INDIRECT_FUNCTIONS = _rt, _memory_at_0, _cfns, _INDIRECT_FUNCTIONS
     end
 end

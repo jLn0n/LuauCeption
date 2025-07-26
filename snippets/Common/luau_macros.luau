@@ -1,4 +1,4 @@
-return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS)
+return function(rt: any, memory_at_0: any, cfns: any, INDIRECT_FUNCTIONS: any)
     local LUAI_MAXCSTACK    = 8000
     local LUA_REGISTRYINDEX = -LUAI_MAXCSTACK - 2000
     local LUA_ENVIRONINDEX  = -LUAI_MAXCSTACK - 2001
