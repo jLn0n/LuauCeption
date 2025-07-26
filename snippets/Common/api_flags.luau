@@ -1,4 +1,4 @@
-return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils: typeof(require("./utils")()))
+return function(rt: any, memory_at_0: any, cfns: any, INDIRECT_FUNCTIONS: any, utils: typeof(require("./utils")()))
     local module = {}
 
     function module.luau_setflag(name: string, state: boolean)

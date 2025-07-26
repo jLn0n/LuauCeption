@@ -20,7 +20,7 @@ local LUA_TUPVAL         = 12
 local LUA_TDEADKEY       = 13
 local LUA_T_COUNT        = LUA_TPROTO
 
-return function(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS)
+return function(rt: any, memory_at_0: any, cfns: any, INDIRECT_FUNCTIONS: any)
     return {
         LUA_TNIL           = LUA_TNIL,
         LUA_TBOOLEAN       = LUA_TBOOLEAN,
