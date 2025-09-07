@@ -33,7 +33,7 @@ return function()
         local array_ptr = cfns.malloc((array_len + 1) * 4)
 
         for idx = 0, (array_len - 1) do
-            local str_val = array[idx]
+            local str_val = array[idx + 1]
             local str_len = #str_val
             local str_ptr = cfns.malloc(str_len + 1)
 
