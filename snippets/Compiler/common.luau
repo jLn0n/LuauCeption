@@ -12,6 +12,13 @@ export type LuauCompileOptions = {
     DisabledBuiltins: {string}?,
 }
 
+local DEFAULT_LuauCompileOptions: LuauCompileOptions = {
+    OptimizationLevel = 1,
+    DebugLevel = 1,
+    TypeInfoLevel = 0,
+    CoverageLevel = 0,
+}
+
 return function(rt: any, memory_at_0: any, cfns: any, INDIRECT_FUNCTIONS: any, utils: typeof(require("../Common/utils")()))
     local module = {}
 
@@ -56,9 +63,9 @@ return function(rt: any, memory_at_0: any, cfns: any, INDIRECT_FUNCTIONS: any, u
         end
     end
 
-    function module.luau_compile(source: string, options: LuauCompileOptions): (string, number)
+    function module.luau_compile(source: string, options: LuauCompileOptions?): (string, number)
         -- load source and luau_CompileOptions
-        local luau_CompileOptions_ptr, compileOptions_free = construct_luau_CompileOptions(options)
+        local luau_CompileOptions_ptr, compileOptions_free = construct_luau_CompileOptions(options or DEFAULT_LuauCompileOptions)
         local source_ptr = utils.cstr(source)
 
         -- allocate for getting bytecode size
