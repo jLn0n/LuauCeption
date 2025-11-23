@@ -27,7 +27,7 @@ return function()
 
     function module.insertCFunction(func: (...any) -> (...any)): number
         local ptr = #INDIRECT_FUNCTIONS + 1
-        INDIRECT_FUNCTIONS[ptr] = func
+        rt_table_set(INDIRECT_FUNCTIONS, ptr, func)
 
         return ptr
     end
