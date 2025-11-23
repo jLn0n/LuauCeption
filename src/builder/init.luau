@@ -6,7 +6,7 @@ local argparse = require("@self/argparse/src/lib")
 
 local VALID_FLAGS = {
     -- combines runtime and entrypoint into one file
-    "BUILD_ONEFILE",
+    "DEBUG_SEPERATED_VARIANTS",
 }
 
 local PARSER = argparse("luauceptionbuilder")
@@ -53,11 +53,6 @@ type VariantSnippetInstructions = {
 }
 
 local WASM2LUAU_EXEC: string? = (function()
-    local STATIC_PATH = "./utils/wasm2luau"
-    if fs.isFile(STATIC_PATH) then
-        return STATIC_PATH
-    end
-
     local which_process = process.exec("which", {"wasm2luau"})
     if not which_process.ok then
         return
@@ -92,9 +87,8 @@ local CONTENT_VARIABLE = newproxy(false)
 local FLAGGED_PATCHES = {
     ["BUILD_ONEFILE"] = {
         ["IMPORT_PATTERN"] = "\\(require\\)\\(['\"]@self\\/runtime['\"]\\)",
-        ["IMPORT_REPLACEMENT"] = "__LUAUCEPTION_RUNTIME__",
-        ["RUNTIME_REPLACEMENT"] = "&RUNTIME&",
-        ["ENCAPSULATION_CODE"] = "local __LUAUCEPTION_RUNTIME__ = (function()\n\n&RUNTIME&\nend)()\n",
+        ["IMPORT_REPLACEMENT"] = "module",
+        ["RUNTIME_REPLACEMENT"] = "%RUNTIME_START%",
     },
 }
 
@@ -102,11 +96,7 @@ local FLAGGED_PATCHES_SNIPPET_ORDER = {
     ["BUILD_ONEFILE"] = {
         {"gotoline", 5},
         {"putstring", "\n\n"},
-        {"putstring", FLAGGED_PATCHES.BUILD_ONEFILE.ENCAPSULATION_CODE},
         {"replaceall", FLAGGED_PATCHES.BUILD_ONEFILE.IMPORT_PATTERN, FLAGGED_PATCHES.BUILD_ONEFILE.IMPORT_REPLACEMENT},
-        -- we can't use the replaceall instruction here because
-        -- file would be modified by the regex, removing regex-unsafe strings
-        -- which makes the runtime have unexpected errors
         {"goto", "end", FLAGGED_PATCHES.BUILD_ONEFILE.RUNTIME_REPLACEMENT},
         {"removelinecursor"},
         {"putstring", CONTENT_VARIABLE, "LUAUCEPTION_RUNTIME"},
@@ -116,12 +106,7 @@ local FLAGGED_PATCHES_SNIPPET_ORDER = {
 local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
     ["Compiler"] = {
         ["runtime"] = {
-            {"jmpifflag", 2, "BUILD_ONEFILE", "defined"},
-            {"goto", "end", "--!optimize 2\n"},
-            {"putstring", createHeaderSnippet("Compiler")},
-            {"jmpifflag", 2, "BUILD_ONEFILE", "undefined"},
             {"gotopos", 1},
-            {"removelinecursor"},
             {"putfile", "Common/vector3_compat.luau"},
         },
         ["entrypoint"] = {
@@ -130,18 +115,19 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
 
             {"gotopos", 1},
             {"putstring", "--!optimize 2\n"},
+
             {"putstring", createHeaderSnippet("Compiler")},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "undefined"},
+            {"putstring", "-- Because you used flag 'DEBUG_SEPERATED_VARIANTS', there's 101% chance that this will not work!\n"},
+
             {"putstring", "local STUB_WARN = false\n"},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "defined"},
+            {"putstring", FLAGGED_PATCHES.BUILD_ONEFILE.RUNTIME_REPLACEMENT .. "\n"},
         },
     },
     ["VM"] = {
         ["runtime"] = {
-            {"jmpifflag", 2, "BUILD_ONEFILE", "defined"},
-            {"goto", "end", "--!optimize 2\n"},
-            {"putstring", createHeaderSnippet("Compiler")},
-            {"jmpifflag", 2, "BUILD_ONEFILE", "undefined"},
             {"gotopos", 1},
-            {"removelinecursor"},
             {"putfile", "Common/vector3_compat.luau"},
         },
         ["entrypoint"] = {
@@ -150,18 +136,19 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
 
             {"gotopos", 1},
             {"putstring", "--!optimize 2\n"},
+
             {"putstring", createHeaderSnippet("VM")},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "undefined"},
+            {"putstring", "-- Because you used flag 'DEBUG_SEPERATED_VARIANTS', there's 101% chance that this will not work!\n"},
+
             {"putstring", "local STUB_WARN = false\n"},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "defined"},
+            {"putstring", FLAGGED_PATCHES.BUILD_ONEFILE.RUNTIME_REPLACEMENT .. "\n"},
         },
     },
     ["Full"] = {
         ["runtime"] = {
-            {"jmpifflag", 2, "BUILD_ONEFILE", "defined"},
-            {"goto", "end", "--!optimize 2\n"},
-            {"putstring", createHeaderSnippet("Compiler")},
-            {"jmpifflag", 2, "BUILD_ONEFILE", "undefined"},
             {"gotopos", 1},
-            {"removelinecursor"},
             {"putfile", "Common/vector3_compat.luau"},
         },
         ["entrypoint"] = {
@@ -170,8 +157,14 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
 
             {"gotopos", 1},
             {"putstring", "--!optimize 2\n"},
+
             {"putstring", createHeaderSnippet("Full")},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "undefined"},
+            {"putstring", "-- Because you used flag 'DEBUG_SEPERATED_VARIANTS', there's 101% chance that this will not work!\n"},
+
             {"putstring", "local STUB_WARN = false\n"},
+            {"jmpifflag", 1, "DEBUG_SEPERATED_VARIANTS", "defined"},
+            {"putstring", FLAGGED_PATCHES.BUILD_ONEFILE.RUNTIME_REPLACEMENT .. "\n"},
         },
     },
 }
@@ -231,7 +224,8 @@ local function processSnippetOrder(
                 pc += if (not flag_defined) then pos_offset else 0
             end
         elseif command == "gotopos" then
-            contentpos = order[1]
+            local pos = order[1]
+            contentpos = (if pos < 0 then #result - pos else pos)
         elseif command == "gotoline" then
             local newline_pos = 0
 
@@ -368,7 +362,7 @@ local function createBuildVariant(variant: BuildVariant, flags: BuilderFlags)
     end
     print(`Successfully processed entrypoint of variant '{variant}'!`)
 
-    if not table.find(flags, "BUILD_ONEFILE") then
+    if table.find(flags, "DEBUG_SEPERATED_VARIANTS") then
         local __VARIANT_FILE = `{variant_path}.luau`
         if fs.isFile(__VARIANT_FILE) then
             fs.removeFile(__VARIANT_FILE)
