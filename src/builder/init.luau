@@ -107,7 +107,7 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
     ["Compiler"] = {
         ["runtime"] = {
             {"gotopos", 1},
-            {"putfile", "Common/vector3_compat.luau"},
+            {"putfile", "Common/vector_compat.luau"},
         },
         ["entrypoint"] = {
             {"putfile", "Compiler/entrypoint.luau"},
@@ -128,7 +128,7 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
     ["VM"] = {
         ["runtime"] = {
             {"gotopos", 1},
-            {"putfile", "Common/vector3_compat.luau"},
+            {"putfile", "Common/vector_compat.luau"},
         },
         ["entrypoint"] = {
             {"putfile", "VM/entrypoint.luau"},
@@ -149,7 +149,7 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
     ["Full"] = {
         ["runtime"] = {
             {"gotopos", 1},
-            {"putfile", "Common/vector3_compat.luau"},
+            {"putfile", "Common/vector_compat.luau"},
         },
         ["entrypoint"] = {
             {"putfile", "Full/entrypoint.luau"},

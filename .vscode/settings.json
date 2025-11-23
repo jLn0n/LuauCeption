@@ -73,6 +73,7 @@
     "luau-lsp.diagnostics.workspace": false,
     "luau-lsp.platform.type": "standard",
     "luau-lsp.completion.autocompleteEnd": true,
+    "luau-lsp.completion.imports.enabled": false,
     "luau-lsp.ignoreGlobs": [
         "**/_Index/**",
         "src/tests/frktest/**",
