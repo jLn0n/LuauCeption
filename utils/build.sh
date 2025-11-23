@@ -3,11 +3,8 @@ BUILDER_SCRIPT="$(realpath "./src/builder")"
 MAIN_DIR="$(realpath "./")" # assuming that the script is ran on LuauCeption/ directory
 
 if ! which wasm2luau > /dev/null 2>&1; then
-    WASM2LUAU_EXEC="$(realpath "./utils/wasm2luau")"
-
-    if [ -f "$WASM2LUAU_EXEC" ]; then
-        export PATH="$PATH:$(dirname "$WASM2LUAU_EXEC")"
-    fi
+    echo "Install Spider with the following command: cargo install --profile release --path ./utils/spider/Targets/Luau/Printer"
+    exit
 fi
 
 mkdir build
