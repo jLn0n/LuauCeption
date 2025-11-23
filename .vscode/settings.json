@@ -76,8 +76,12 @@
     "luau-lsp.ignoreGlobs": [
         "**/_Index/**",
         "src/tests/frktest/**",
+        "luau/**",
         "build/**",
         "utils/**",
         "snippets/**"
     ],
+    "luau-lsp.types.definitionFiles": {
+        "@spider_runtime": "./snippets/runtime_types.d.luau"
+    }
 }

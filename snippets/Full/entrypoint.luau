@@ -4,10 +4,10 @@ local compiler_common_init = require("../Compiler/common")
 local vm_common_init = require("../VM/common")
 export type LuauCompileOptions = compiler_common_init.LuauCompileOptions
 
-local rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils = runtime_create(require("../VM/polyfill"))
-local api_flags = api_flags_create(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils)
-local compiler_common = compiler_common_init(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils)
-local vm_common = vm_common_init(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils)
+local RuntimeInstance, utils = runtime_create(require("../VM/polyfill"))
+local api_flags = api_flags_create(RuntimeInstance, utils)
+local compiler_common = compiler_common_init(RuntimeInstance, utils)
+local vm_common = vm_common_init(RuntimeInstance, utils)
 
 return {
     luau_compile = compiler_common.luau_compile,
@@ -16,13 +16,9 @@ return {
     luau_setflag = api_flags.luau_setflag,
     luau_setallflags = api_flags.luau_setallflags,
     luau_resetflags = api_flags.luau_resetflags,
-    macros = require("../VM/luau_macros")(rt, memory_at_0, cfns, INDIRECT_FUNCTIONS, utils),
+    macros = require("../VM/luau_macros")(RuntimeInstance, utils),
     wasm = {
-        rt = rt,
-        cfns = cfns,
-        indirect_function_table = INDIRECT_FUNCTIONS,
-        memory = memory_at_0,
-        insertCFunction = utils.insertCFunction,
-        cstr = utils.cstr,
+        exports = RuntimeInstance,
+        utils = utils,
     }
 }

@@ -1,5 +1,5 @@
 return function()
-    local rt, memory_at_0, cfns, INDIRECT_FUNCTIONS
+    local exports, memory, INDIRECT_FUNCTIONS
     local module = {}
 
     function module.stub(name: string, ret: any)
@@ -12,37 +12,50 @@ return function()
         end
     end
 
+    function module.load_string(addr: number, length: number): string
+        local content = buffer.create(length)
+
+        buffer.copy(content, 0, memory[1], addr, length)
+        return buffer.tostring(content)
+    end
+
+    function module.store_string(addr: number, data: string, length: number?)
+        local content = buffer.fromstring(if not length or length == #data then data else string.sub(data, 1, length))
+
+        buffer.copy(memory[1], addr, content)
+    end
+
     function module.insertCFunction(func: (...any) -> (...any)): number
-        local ptr = #INDIRECT_FUNCTIONS.data + 1
-        INDIRECT_FUNCTIONS.data[ptr] = func
+        local ptr = #INDIRECT_FUNCTIONS + 1
+        INDIRECT_FUNCTIONS[ptr] = func
 
         return ptr
     end
 
     function module.cstr(value: string): number
         local str_len = #value
-        local str_ptr = cfns.malloc(str_len + 1)
-        rt.store.string(memory_at_0, str_ptr, value)
-        rt.store.i32_n8(memory_at_0, str_ptr + str_len, 0)
+        local str_ptr = exports.malloc(str_len + 1)
 
+        rt_store_i32_into_i8(memory, str_ptr + str_len, 0)
+        module.store_string(str_ptr, value)
         return str_ptr
     end
 
     function module.cstr_array(array: {string}): number
         local array_len = #array
-        local array_ptr = cfns.malloc((array_len + 1) * 4)
+        local array_ptr = exports.malloc((array_len + 1) * 4)
 
         for idx = 0, (array_len - 1) do
             local str_val = array[idx + 1]
             local str_len = #str_val
-            local str_ptr = cfns.malloc(str_len + 1)
+            local str_ptr = exports.malloc(str_len + 1)
 
-            rt.store.string(memory_at_0, str_ptr, str_val)
-            rt.store.i32_n8(memory_at_0, str_ptr + str_len, 0)
-            rt.store.i32(memory_at_0, array_ptr + (idx * 4), str_ptr)
+            module.store_string(str_ptr, str_val)
+            rt_store_i32_into_i8(memory, str_ptr + str_len, 0)
+            rt_store_i32(memory, array_ptr + (idx * 4), str_ptr)
         end
 
-        rt.store.i32(memory_at_0, array_ptr + (array_len * 4), 0)
+        rt_store_i32(memory, array_ptr + (array_len * 4), 0)
         return array_ptr
     end
 
@@ -50,15 +63,15 @@ return function()
         local position = 0
 
         while true do
-            local str_ptr = rt.load.i32(array_ptr + position)
+            local str_ptr = rt_load_i32(memory, array_ptr + position)
             if str_ptr == 0 then
                 break
             end
 
-            cfns.free(str_ptr)
+            exports.free(str_ptr)
             position += 4
         end
-        cfns.free(array_ptr)
+        exports.free(array_ptr)
     end
 
     function module.newCException(excPtr: number)
@@ -66,17 +79,17 @@ return function()
         CException.ptr = excPtr
 
         function CException._UndecoratedName(self)
-            local name_ptr = rt.load.i32(memory_at_0, self.ptr + 4)
-            return rt.load.string(memory_at_0, name_ptr, cfns.strlen(name_ptr))
+            local name_ptr = rt_load_i32(memory, self.ptr + 4)
+            return module.load_string(name_ptr, exports.strlen(name_ptr))
         end
 
         function CException.vfptr(self)
-            return rt.load.i32(memory_at_0, self.ptr)
+            return rt_load_i32(memory, self.ptr)
         end
         return CException
     end
 
-    return module, function(_rt: any, _memory_at_0: any, _cfns: any, _INDIRECT_FUNCTIONS: any)
-        rt, memory_at_0, cfns, INDIRECT_FUNCTIONS = _rt, _memory_at_0, _cfns, _INDIRECT_FUNCTIONS
+    return module, function(rt_inst: any)
+        exports, memory, INDIRECT_FUNCTIONS = rt_inst, rt_inst.memory, rt_inst.__indirect_function_table
     end
 end
