@@ -105,10 +105,7 @@ local FLAGGED_PATCHES_SNIPPET_ORDER = {
 
 local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
     ["Compiler"] = {
-        ["runtime"] = {
-            {"gotopos", 1},
-            {"putfile", "Common/vector_compat.luau"},
-        },
+        ["runtime"] = {},
         ["entrypoint"] = {
             {"putfile", "Compiler/entrypoint.luau"},
             {"process", "./src/builder/build.darklua.json"},
@@ -126,10 +123,7 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
         },
     },
     ["VM"] = {
-        ["runtime"] = {
-            {"gotopos", 1},
-            {"putfile", "Common/vector_compat.luau"},
-        },
+        ["runtime"] = {},
         ["entrypoint"] = {
             {"putfile", "VM/entrypoint.luau"},
             {"process", "./src/builder/build.darklua.json"},
@@ -147,10 +141,7 @@ local VARIANT_BUILD_SNIPPET_ORDER: {[string]: VariantSnippetInstructions} = {
         },
     },
     ["Full"] = {
-        ["runtime"] = {
-            {"gotopos", 1},
-            {"putfile", "Common/vector_compat.luau"},
-        },
+        ["runtime"] = {},
         ["entrypoint"] = {
             {"putfile", "Full/entrypoint.luau"},
             {"process", "./src/builder/build.darklua.json"},
