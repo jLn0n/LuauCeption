@@ -113,23 +113,21 @@ return function(utils: typeof(require("../Common/utils")()))
         return 0
     end
 
-    function polyfill.fd_write(fd, list, count, ret_pointer)
+    function polyfill.fd_write(fd: number, iov: number, iov_count: number, ptr_num: number)
         local file = FILE_MAP[fd]
-        if not file then return 8 end
+        if not file then
+            return 8
+        end
+
         local total = 0
-        for pointer = list, list + (count - 1) * 8, 8 do
+        for pointer = iov, iov + (iov_count - 1) * 8, 8 do
             local start = rt_load_i32(memory, pointer)
             local len = rt_load_i32(memory, pointer + 4)
-            local read = (function()
-                local buf = buffer.create(len)
-                buffer.copy(buf, 0, memory[1], start, len)
-                return buffer.tostring(buf)
-            end)() --rt_load_string(memory, start, len)
+            total += len
 
-            table.insert(file, read)
-            total = total + #read
+            table.insert(file, buffer.readstring(memory[1], start, len))
         end
-        rt_store_i32(memory, ret_pointer, total)
+        rt_store_i32(memory, ptr_num, total)
         fd_flush(file)
         return 0
     end
