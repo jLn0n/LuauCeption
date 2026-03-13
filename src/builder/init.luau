@@ -52,8 +52,8 @@ type VariantSnippetInstructions = {
     entrypoint: SnippetOrder
 }
 
-local WASM2LUAU_EXEC: string? = (function()
-    local which_process = process.exec("which", {"wasm2luau"})
+local SPIDER_EXEC: string? = (function()
+    local which_process = process.exec("which", {"spider-cli"})
     if not which_process.ok then
         return
     end
@@ -343,14 +343,14 @@ local function createBuildVariant(variant: BuildVariant, flags: BuilderFlags)
         return error(`Variant '{variant}' WASM output not found!`)
     end
 
-    local wasynth_proc = process.create(WASM2LUAU_EXEC :: string, {wasm_file})
-    local wasynth_output = wasynth_proc.stdout:readToEnd()
-    if not wasynth_proc:status().ok then
+    local transpiler_proc = process.create(SPIDER_EXEC :: string, {"-t", "luau", "-s", "web-assembly", "-o", wasm_file})
+    local transpiler_out = transpiler_proc.stdout:readToEnd()
+    if not transpiler_proc:status().ok then
         return error(`Failed to transpile WASM output of variant '{variant}'`)
     end
     print(`Variant '{variant}' got transpiled to luau successfully.`)
 
-    local processed_runtime = processSnippetOrder(snippet_orders.runtime, flags, nil, wasynth_output)
+    local processed_runtime = processSnippetOrder(snippet_orders.runtime, flags, nil, transpiler_out)
     if not processed_runtime then
         return error(`Failed to process runtime of variant '{variant}'`)
     end
@@ -394,8 +394,8 @@ local function createBuildVariant(variant: BuildVariant, flags: BuilderFlags)
 end
 
 do
-    if not WASM2LUAU_EXEC then
-        print("Please install wasm2luau by running ./utils/setup_wasm2luau.sh first!")
+    if not SPIDER_EXEC then
+        print("Please install Spider. More info at the project's README.")
         return
     end
 

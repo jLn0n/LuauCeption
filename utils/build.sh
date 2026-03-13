@@ -2,8 +2,8 @@
 BUILDER_SCRIPT="$(realpath "./src/builder")"
 MAIN_DIR="$(realpath "./")" # assuming that the script is ran on LuauCeption/ directory
 
-if ! which wasm2luau > /dev/null 2>&1; then
-    echo "Install Spider with the following command: cargo install --profile release --path ./utils/spider/Targets/Luau/Printer"
+if ! which spider-cli > /dev/null 2>&1; then
+    echo "Please install Spider. More info at the project's README."
     exit
 fi
 
