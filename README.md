@@ -13,7 +13,7 @@ The old testing script (``Test.luau``) at ``utils/_helpers`` is still available,
 
 # Development Setup
 * Make sure to install [Rokit](https://github.com/rojo-rbx/rokit) and [emscripten](https://emscripten.org) >5.0.2
-* Also install [Wasynth](https://github.com/Rerumu/Wasynth) from compiled releases and put in `./utils` directory
+* Also install the specific commit `8c23a80` of [Spider](https://github.com/SovereignSatellite/Spider).
 
 ## Special thanks
 - [@Rerumu](https://github.com/Rerumu) - a LOT of troubleshooting
